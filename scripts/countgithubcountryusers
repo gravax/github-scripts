@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# Count users from a specific country with a script similar to web query: https://github.com/search?q=location:MyCountry+type:user&type=Users
+#
+# (c) 2020 - Gilles Gravier - gilles@gravier.org
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+#
+# Some variables
+#
+
+#
+# What users we are really looking for
+#
+# This is probably the only line you need to edit
+#
+querytext="oman"
+
+#
+# Other variables
+#
+rawfile="github-"$querytext"-users-query.txt"
+sortedfile="github-"$querytext"-users-sorted.txt"
+query="https://api.github.com/search/users?q="location:$querytext"+type:user&type=Users"
+silentcurl=""
+
+#
+# Make clean files
+#
+rm -f $rawfile $sortedfile
+
+#
+# First find how many users
+#
+total_count=`curl $silentcurl $query"&page=1&per_page=1"|grep "total_count" | cut -d":" -f2|cut -d"," -f1`
+
+echo " "
+echo "Found "$querytext" entries: "$total_count
+
+#
+# Then how many 100 entry pages to get
+#
+total_pages=$(((total_count/100)+1))
+
+echo "Total pages to get: "$total_pages
+echo -n "Getting page"
+
+for ((i=1; i<=$total_pages; i++))
+do
+	echo -n " "$i
+	qurl=$query"&page="$i"&per_page=100"
+	curl $silentcurl $qurl | grep "login" | cut -d"\"" -f4 >> $rawfile
+done
+
+echo ""
+
+#
+# Sort the result and clean it up
+#
+
+echo "Sorting the results"
+cat $rawfile | sort | uniq > $sortedfile
+rm $rawfile
+number=`cat $sortedfile | wc -l`
+echo "There are "$number" unique users in "$querytext" in file: "$sortedfile
+
