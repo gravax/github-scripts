@@ -2,7 +2,7 @@
 #
 # Count users from a specific country with a script similar to web query: https://github.com/search?q=location:MyCountry+type:user&type=Users
 #
-# (c) 2020 - Gilles Gravier - gilles@gravier.org
+# (c) 2023 - Gilles Gravier - gilles@gravier.org
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
